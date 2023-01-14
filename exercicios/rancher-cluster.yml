@@ -1,0 +1,24 @@
+nodes:
+  - address: 172.31.43.193
+    user: ubuntu
+    role: [controlplane, worker, etcd]
+  - address: 172.31.38.52
+    user: ubuntu
+    role: [controlplane, worker, etcd]
+  - address: 172.31.44.134
+    user: ubuntu
+    role: [controlplane, worker, etcd]
+
+
+services:
+  etcd:
+    snapshot: true
+    creation: 6h
+    retention: 24h
+
+# Required for external TLS termination with
+# ingress-nginx v0.22+
+ingress:
+  provider: nginx
+  options:
+    use-forwarded-headers: "true"

@@ -1,8 +1,6 @@
 
 
-
 # Aula 8 - ArgoCD - Instalação
-
 
 https://www.digitalocean.com/community/tutorials/how-to-deploy-to-kubernetes-using-argo-cd-and-gitops
 
@@ -21,7 +19,6 @@ I7rZeFI5e5NFcDbQ
 ```
 
 
-
 # Instalar Kubectl
 ```sh
 curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -37,14 +34,12 @@ chmod +x /usr/local/bin/argocd
 ```
 
 
-
 # KUBECTL
 
 ```sh
 kubectl config use-context dev-ip-172-31-37-33
 kubectl config use-context dev-ip-172-31-37-33
 ```
-
 
 
 ## Argo Login

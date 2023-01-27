@@ -6,21 +6,11 @@
 4) Ambiente desenvolvimento
 5) Ambiente Homologação
 6) Ambiente de Produção
-<<<<<<< HEAD
 7) NFS
 8) ArgoCD - Instalação
 9) Pipeline - Desenvolvimento
 10) Pipeline - Homologação
 11) Pipeline - Produção
-
-
-
-=======
-7) Pipeline - Desenvolvimento
-8) Pipeline - Homologação
-9) Pipeline - Produção
-10) App Monitoring - Sentry
->>>>>>> refs/remotes/origin/main
 
 
 # rancher-ha
@@ -43,13 +33,8 @@ Usando na aula: UBUNTU 22.04 LTS
 
 ```sh
 #!/bin/sh
-<<<<<<< HEAD
-sudo su
-=======
->>>>>>> refs/remotes/origin/main
 curl https://releases.rancher.com/install-docker/20.10.sh | sh
 usermod -aG docker ubuntu
-
 ```
 
 ## Portas
@@ -69,11 +54,11 @@ In an RKE cluster, Rancher server data is stored on etcd. This etcd database run
 The etcd database requires an odd number of nodes so that it can always elect a leader with a majority of the etcd cluster. If the etcd database cannot elect a leader, etcd can suffer from split brain, requiring the cluster to be restored from backup. If one of the three etcd nodes fails, the two remaining nodes can elect a leader because they have the majority of the total number of etcd nodes.
 
 
-<<<<<<< HEAD
-=======
+ 
+ 
 # Aula 1 - Rancher HA - Preparação
 
->>>>>>> refs/remotes/origin/main
+ 
 ## INCIO
 
 Logar na máquina do ELB - onde tudo será realizado
@@ -81,19 +66,19 @@ Instalar o kubectl nela também
 Instalar o RKE nela também.
 
 ```sh
-<<<<<<< HEAD
+ 
 ssh -i devopsdevops.pem ubuntu@18.223.118.90                  # - NGINX - LB
 
 ssh -i devopsdevops.pem ubuntu@18.216.214.80   172.31.33.192   # - rancher-server-1
 ssh -i devopsdevops.pem ubuntu@18.222.165.115  172.31.32.92   # - rancher-server-2
 ssh -i devopsdevops.pem ubuntu@52.14.242.42    172.31.45.230    # - rancher-server-3
-=======
+ 
 ssh -i devopsdevops.pem ubuntu@18.222.240.164                  # - NGINX - LB
 
 ssh -i devopsdevops.pem ubuntu@18.222.192.108   172.31.43.193   # - rancher-server-1
 ssh -i devopsdevops.pem ubuntu@18.118.49.64     172.31.38.52   # - rancher-server-2
 ssh -i devopsdevops.pem ubuntu@3.144.77.173     172.31.44.134    # - rancher-server-3
->>>>>>> refs/remotes/origin/main
+ 
 ```
 
 ### Copiar chave PEM para máquina NGINX para ela logar nas outras.
@@ -106,15 +91,15 @@ Para servidores com senha, olhar arquivo ssh-no-cloud.md
 vi ~/.ssh/id_rsa
 chmod 600 /home/ubuntu/.ssh/id_rsa
 
-<<<<<<< HEAD
+ 
 ssh ubuntu@172.31.45.101
 ssh ubuntu@172.31.44.10
 ssh ubuntu@172.31.45.120
-=======
+ 
 ssh ubuntu@172.31.33.192
 ssh ubuntu@172.31.32.92
 ssh ubuntu@172.31.45.230
->>>>>>> refs/remotes/origin/main
+ 
 ```
 
 
@@ -163,11 +148,10 @@ sudo mv linux-amd64/helm /usr/local/bin/helm
 ```
 
 
-<<<<<<< HEAD
 # Parte 2 - Instalação rancher
-=======
+ 
 # Aula 3 - Rancher HA - Instalação rancher
->>>>>>> refs/remotes/origin/main
+ 
 
 https://ranchermanager.docs.rancher.com/how-to-guides/new-user-guides/kubernetes-cluster-setup/high-availability-installs
 
@@ -178,7 +162,6 @@ https://ranchermanager.docs.rancher.com/how-to-guides/new-user-guides/kubernetes
 # Certificate Manager
 kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.7.0/cert-manager.yaml
 
-<<<<<<< HEAD
 # kubectl create namespace cert-manager
 
 #helm repo add jetstack https://charts.jetstack.io
@@ -189,8 +172,6 @@ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.7
 # --namespace cert-manager \
 # --version v1.7.0
 
-=======
->>>>>>> refs/remotes/origin/main
 kubectl get pods --namespace cert-manager
 ```
 
@@ -206,12 +187,12 @@ kubectl create namespace cattle-system
 # Instalar Rancher
 helm install rancher rancher-stable/rancher \
  --namespace cattle-system \
-<<<<<<< HEAD
+ 
  --set hostname=rancher.devopsforlife.io 
 # --set ingress.tls.source=letsEncrypt
-=======
+ 
  --set hostname=rancher.devopsforlife.io
->>>>>>> refs/remotes/origin/main
+ 
  
 
 helm upgrade rancher rancher-stable/rancher \
@@ -235,11 +216,11 @@ docker run -d --restart=unless-stopped \
 
 
 
-<<<<<<< HEAD
+ 
 DEV
 
 ssh -i devopsdevops.pem ubuntu@3.20.234.67
-=======
+ 
 # Aula 4 - Ambiente desenvolvimento
 
 Para o ambiente de 3 máquinas. 
@@ -283,21 +264,21 @@ ssh -i devopsdevops.pem ubuntu@3.16.165.101
 curl https://releases.rancher.com/install-docker/20.10.sh | sh
 usermod -aG docker ubuntu
 ```
->>>>>>> refs/remotes/origin/main
+ 
 
 
 
 
 
 
-<<<<<<< HEAD
+ 
 # Kubernetes-HA - Alta Disponibilidade
-=======
+ 
 # Aula 6 - Ambiente Produção
 
 
 ## Kubernetes-HA - Alta Disponibilidade
->>>>>>> refs/remotes/origin/main
+ 
 
 
 Repositorio usado para mostrar instalação do Rancher em HA.
@@ -307,11 +288,11 @@ https://rancher.com/docs/rancher/v2.x/en/troubleshooting/kubernetes-components/e
 https://rancher.com/learning-paths/building-a-highly-available-kubernetes-cluster/
 
 
-<<<<<<< HEAD
-=======
+ 
+ 
 
 
->>>>>>> refs/remotes/origin/main
+ 
 ## Requisitos
 
 Cluster Kubernetes HA de Produção
@@ -320,11 +301,11 @@ Cluster Kubernetes HA de Produção
 2 instâncias para CONTROLPLANE - Podendo perder 1
 4 instâncias para WORKER - Podendo perder todas
 
-<<<<<<< HEAD
+ 
 Usando na demonstração: UBUNTU 16.04 LTS
-=======
+ 
 Usando na demonstração: UBUNTU 22.04 LTS
->>>>>>> refs/remotes/origin/main
+ 
 
 ## Docker instalado em todas as máquinas
 
@@ -341,10 +322,10 @@ Abrir o Rancher e criar um novo cluster.
 
 Adicionar novo cluster com Existing Nodes
 
-<<<<<<< HEAD
+ 
 
-=======
->>>>>>> refs/remotes/origin/main
+ 
+ 
 ```sh
 $ ssh -i devops-ninja.pem ubuntu@3.227.241.169   # - Rancher-server
 
@@ -380,7 +361,7 @@ $ ssh -i devops-ninja.pem ubuntu@3.237.75.239  # - worker-4
 
 
 ```
-<<<<<<< HEAD
+
 
 
 
@@ -540,5 +521,5 @@ kubectl describe pvc my-pvc
 
 
 
-=======
->>>>>>> refs/remotes/origin/main
+ 
+ 

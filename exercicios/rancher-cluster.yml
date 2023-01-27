@@ -1,4 +1,5 @@
 nodes:
+<<<<<<< HEAD
   - address: 172.31.45.101
     user: ubuntu
     role: [controlplane, worker, etcd]
@@ -9,6 +10,19 @@ nodes:
     user: ubuntu
     role: [controlplane, worker, etcd]
 
+=======
+  - address: 172.31.43.193
+    user: ubuntu
+    role: [controlplane, worker, etcd]
+  - address: 172.31.38.52
+    user: ubuntu
+    role: [controlplane, worker, etcd]
+  - address: 172.31.44.134
+    user: ubuntu
+    role: [controlplane, worker, etcd]
+
+
+>>>>>>> refs/remotes/origin/main
 services:
   etcd:
     snapshot: true

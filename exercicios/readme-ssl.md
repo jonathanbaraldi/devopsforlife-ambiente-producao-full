@@ -1,18 +1,16 @@
 
 # Agenda
-1) Ambiente
-2) Rancher HA - Preparação
-3) Rancher HA - Instalação
-4) Ambiente desenvolvimento
-5) Ambiente Homologação
-6) Ambiente de Produção
-7) NFS
-8) ArgoCD - Instalação
-9) Pipeline - Desenvolvimento
-10) Pipeline - Homologação
-11) Pipeline - Produção
+1) Rancher HA - Preparação
+2) Rancher HA - Instalação
 
-12) Revisão 
+3) Ambiente de Produção - Considerações
+4) Aplicação - Preparação
+5) Aplicação - Build
+6) Aplicação - Deploy
+7) ArgoCD - SSL
+8) Pipeline - Produção
+
+9) Revisão 
 
 # rancher-ha
 
@@ -25,8 +23,8 @@ https://rancher.com/docs/rancher/v2.x/en/installation/how-ha-works/
 ## Requisitos
 
 1 DNS
-1 máquina para load balancer
-3 máquinas para o rancher-server
+1 máquina para load balancer - 1/1 
+1 máquinas para o rancher-server - 2/8 -50gb 
 
 Usando na aula: UBUNTU 22.04 LTS
 
@@ -68,17 +66,11 @@ Instalar o RKE nela também.
 
 ```sh
  
-ssh -i devopsdevops.pem ubuntu@18.223.118.90                  # - NGINX - LB
+ssh -i devops-full.pem ubuntu@3.143.213.134                  # - NGINX - LB
 
-ssh -i devopsdevops.pem ubuntu@18.216.214.80   172.31.33.192   # - rancher-server-1
-ssh -i devopsdevops.pem ubuntu@18.222.165.115  172.31.32.92   # - rancher-server-2
-ssh -i devopsdevops.pem ubuntu@52.14.242.42    172.31.45.230    # - rancher-server-3
- 
-ssh -i devopsdevops.pem ubuntu@18.222.240.164                  # - NGINX - LB
-
-ssh -i devopsdevops.pem ubuntu@18.222.192.108   172.31.43.193   # - rancher-server-1
-ssh -i devopsdevops.pem ubuntu@18.118.49.64     172.31.38.52   # - rancher-server-2
-ssh -i devopsdevops.pem ubuntu@3.144.77.173     172.31.44.134    # - rancher-server-3
+ssh -i devops-full.pem ubuntu@3.135.65.84       172.31.17.104   # - rancher-server-1
+# ssh -i devopsdevops.pem ubuntu@18.222.165.115  172.31.32.92    # - rancher-server-2
+# ssh -i devopsdevops.pem ubuntu@52.14.242.42    172.31.45.230   # - rancher-server-3
  
 ```
 
@@ -152,65 +144,93 @@ sudo mv linux-amd64/helm /usr/local/bin/helm
 # Parte 2 - Instalação rancher
  
 # Aula 3 - Rancher HA - Instalação rancher
- 
-
-https://ranchermanager.docs.rancher.com/how-to-guides/new-user-guides/kubernetes-cluster-setup/high-availability-installs
-
-## Cert Manager
-```sh
 
 
-# Certificate Manager
-kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.7.0/cert-manager.yaml
-
-# kubectl create namespace cert-manager
-
-#helm repo add jetstack https://charts.jetstack.io
-
-#helm repo update
-#helm install \
-# cert-manager jetstack/cert-manager \
-# --namespace cert-manager \
-# --version v1.7.0
-
-kubectl get pods --namespace cert-manager
-```
+https://ranchermanager.docs.rancher.com/getting-started/installation-and-upgrade/installation-references/helm-chart-options#external-tls-termination
 
 
 ## Rancher
 
-```sh
 
-# Instalar o Rancher - Preparar
+## Instalar o Rancher - Preparar 
+
+```sh
 helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
 kubectl create namespace cattle-system
 
-# Instalar Rancher
 helm install rancher rancher-stable/rancher \
- --namespace cattle-system \
- 
- --set hostname=rancher.devopsforlife.io 
-# --set ingress.tls.source=letsEncrypt
- 
- --set hostname=rancher.devopsforlife.io
- 
- 
+  --namespace cattle-system \
+  --set hostname=rancher.devopsforlife.io  \
+  --set replicas=1 \
+  --set tls=external 
 
 helm upgrade rancher rancher-stable/rancher \
   --namespace cattle-system \
-  --set hostname=rancher.devopsforlife.io 
+  --set hostname=rancher.devopsforlife.io  \
+  --set replicas=1 \
+  --set tls=external   
 
 
-# Verificar deployment
+helm uninstall rancher
+
 kubectl -n cattle-system rollout status deploy/rancher
 kubectl -n cattle-system get deploy rancher
 
+https://ranchermanager.docs.rancher.com/v2.5/pages-for-subheaders/install-upgrade-on-a-kubernetes-cluster#3-choose-your-ssl-configuration
+```
+
+
+## Pegar a senha de admin para logar
+
+If this is the first time you installed Rancher, get started by running this command and clicking the URL it generates:
+
+```sh
+echo https://rancher.isthmus.com.br/dashboard/?setup=$(kubectl get secret --namespace cattle-system bootstrap-secret -o go-template='{{.data.bootstrapPassword|base64decode}}')
+```
+
+To get just the bootstrap password on its own, run:
+
+```sh
+kubectl get secret --namespace cattle-system bootstrap-secret -o go-template='{{.data.bootstrapPassword|base64decode}}{{ "\n" }}'
+
+# sht6cp57wg4qwh69dsdk7mn8d2zfzb7ccs59p45v2fxj26jnpwp2bf
+# sht6cp57wg4qwh69dsdk7mn8d2zfzb7ccs59p45v2fxj26jnpwp2bf
+
+kubectl -n cattle-system rollout status deploy/rancher
+```
+
+mpjlnfdl9qxqndc7plxldtz25rdqjwvr7qlkgdxmj9qn2rnnxdxz89
+
+
+
+
+## 8 - Criação do certificado
+Criar certificado para nossos dominios:
+
+ *.devopsforlife.io
+
+
+```sh
+> openssl genrsa -out privkey.pem 2048
+
+> openssl req -new -key privkey.pem -out cert.csr
+
+> openssl x509 -req -days 365 -in cert.csr -signkey privkey.pem -out fullchain.pem
+
+
+
+```
+
+
+
 
 # RODAR O NGINX
+```
 sudo vi /etc/nginx.conf
 docker run -d --restart=unless-stopped \
  -p 80:80 -p 443:443 \
  -v /etc/nginx.conf:/etc/nginx/nginx.conf \
+ -v /home/ubuntu:/certs \
  nginx:1.14
 ```
 
@@ -218,63 +238,28 @@ docker run -d --restart=unless-stopped \
 
 
  
-DEV
-
-ssh -i devopsdevops.pem ubuntu@3.20.234.67
- 
-# Aula 4 - Ambiente desenvolvimento
-
-Para o ambiente de 3 máquinas. 
-
-
-ssh -i devopsdevops.pem ubuntu@52.14.3.1
-ssh -i devopsdevops.pem ubuntu@3.16.214.77
-ssh -i devopsdevops.pem ubuntu@18.218.119.45
-
-
-
-
-## Docker instalado em todas as máquinas
-
-```sh
-#!/bin/bash
-curl https://releases.rancher.com/install-docker/20.10.sh | sh
-usermod -aG docker ubuntu
-```
-
-```sh
-docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run  rancher/rancher-agent:v2.7.0 --server https://rancher.devopsforlife.io --token 8zhzb6t226trxx8vfq6t5p66zsrr77rcbstqkx8qf2fnsbhc5v8v8v --ca-checksum e75eb8d5e03fee1469175ed28c0bceb399fab9a98a0e7b778e4071bbf46ed98b --etcd --controlplane --worker
-```
-
-
-# Aula 5 - Ambiente Homologação
-
-
-Para o ambiente de 3 máquinas. 
-
-
-ssh -i devopsdevops.pem ubuntu@18.219.187.209
-ssh -i devopsdevops.pem ubuntu@18.216.188.196
-ssh -i devopsdevops.pem ubuntu@3.16.165.101
-
-
-## Docker instalado em todas as máquinas
-
-```sh
-#!/bin/bash
-curl https://releases.rancher.com/install-docker/20.10.sh | sh
-usermod -aG docker ubuntu
-```
- 
-
-
-
-
-
-
- 
 # Kubernetes-HA - Alta Disponibilidade
  
+
+
+
+ *.prod.devopsforlife.io
+
+
+```sh
+openssl genrsa -out tls.key 2048
+openssl req -new -key tls.key -out tls.csr
+openssl x509 -req -in tls.csr -signkey tls.key -out tls.crt -days 365
+
+kubectl create secret tls prod-devopsforlife --key tls.key --cert tls.crt
+
+# default
+
+```
+
+
+
+
 # Aula 6 - Ambiente Produção
 
 

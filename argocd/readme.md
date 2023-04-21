@@ -1,5 +1,4 @@
 
-
 # Aula 8 - ArgoCD - Instalação
 
 https://www.digitalocean.com/community/tutorials/how-to-deploy-to-kubernetes-using-argo-cd-and-gitops
@@ -15,7 +14,7 @@ watch kubectl get pods -n argocd
 # kubectl port-forward svc/argocd-server -n argocd 8080:443
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
 
-I7rZeFI5e5NFcDbQ
+biMzQUT5oCuWpTjm
 ```
 
 
@@ -29,10 +28,16 @@ kubectl version --client
 
 # ArgoCD
 ```sh
-curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+sudo curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
 chmod +x /usr/local/bin/argocd
 ```
 
+
+# Ingress
+
+```
+kubectl apply -f ingress.yaml
+```
 
 # KUBECTL
 
@@ -59,12 +64,28 @@ Usar o arquivo com o IP interno do kubeconfig
 ```sh
 argocd cluster add dev-ip-172-31-37-33
 
+qa-ip-172-31-41-237
 ```
 
 ## ADICIONANDO O CLUSTER DE QA PARA O ARGOCD
 
 
-## ADICIONANDO O CLUSTER DE DEV PARA O ARGOCD
+```sh
+argocd cluster add qa-ip-172-31-41-237
+
+```
+
+
+## ADICIONANDO O CLUSTER DE PROD PARA O ARGOCD
+
+
+
+```sh
+argocd cluster add prod-ip-172-31-41-5
+
+```
+
+
 
 
 
@@ -72,7 +93,6 @@ argocd cluster add dev-ip-172-31-37-33
 
 
 https://github.com/jonathanbaraldi/argocd-example-apps
-
 
 
 ## Aula 9 - dev
@@ -88,7 +108,8 @@ argocd app sync helm-guestbook-dev
 
 ## Aula 10 - qa
 ```sh
-argocd app create helm-guestbook-qa  --repo https://github.com/jonathanbaraldi/argocd-example-apps --path helm-guestbook --dest-server https://kubernetes.default.svc --dest-namespace default
+argocd app create helm-guestbook-qa  --repo https://github.com/jonathanbaraldi/argocd-example-apps --path helm-guestbook --dest-server https://172.31.41.237:6443 --dest-namespace default
+
 
 argocd app set helm-guestbook-qa --values values-qa.yaml
 
@@ -96,18 +117,17 @@ argocd app get helm-guestbook-qa
 argocd app sync helm-guestbook-qa
 ```
 
+
+
 ## Aula 11 - prod
 ```sh
-argocd app create helm-guestbook-prod  --repo https://github.com/jonathanbaraldi/argocd-example-apps --path helm-guestbook --dest-server https://kubernetes.default.svc --dest-namespace default
+argocd app create helm-guestbook-prod  --repo https://github.com/jonathanbaraldi/argocd-example-apps --path helm-guestbook --dest-server https://172.31.41.5:6443 --dest-namespace default
 
 argocd app set helm-guestbook-qa --values values-prod.yaml
 
 argocd app get helm-guestbook-prod
 argocd app sync helm-guestbook-prod
 ```
-
-
-
 
 
 

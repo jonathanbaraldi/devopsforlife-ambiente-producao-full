@@ -3,14 +3,17 @@
 1) Rancher HA - Preparação
 2) Rancher HA - Instalação
 
-3) Ambiente de Produção - Considerações
-4) Aplicação - Preparação
-5) Aplicação - Build
-6) Aplicação - Deploy
-7) ArgoCD - SSL
-8) Pipeline - Produção
+3) Aplicação - Preparação
+4) Aplicação - Build
+5) Aplicação - Deploy
+6) Aplicação - SSL
+
+7) ArgoCD - Repositório privado
+
+8) Ambiente de Produção - Considerações
 
 9) Revisão 
+
 
 # rancher-ha
 
@@ -208,8 +211,6 @@ mpjlnfdl9qxqndc7plxldtz25rdqjwvr7qlkgdxmj9qn2rnnxdxz89
 Criar certificado para nossos dominios:
 
  *.devopsforlife.io
-
-
 ```sh
 > openssl genrsa -out privkey.pem 2048
 
@@ -240,12 +241,7 @@ docker run -d --restart=unless-stopped \
  
 # Kubernetes-HA - Alta Disponibilidade
  
-
-
-
- *.prod.devopsforlife.io
-
-
+ *.dev.devopsforlife.io
 ```sh
 openssl genrsa -out tls.key 2048
 openssl req -new -key tls.key -out tls.csr
@@ -257,16 +253,11 @@ kubectl create secret tls prod-devopsforlife --key tls.key --cert tls.crt
 
 ```
 
-
-
-
-# Aula 6 - Ambiente Produção
+# Aula 3 - Ambiente Produção
 
 
 ## Kubernetes-HA - Alta Disponibilidade
  
-
-
 Repositorio usado para mostrar instalação do Rancher em HA.
 
 https://rancher.com/docs/rancher/v2.x/en/troubleshooting/kubernetes-components/etcd/
@@ -274,238 +265,46 @@ https://rancher.com/docs/rancher/v2.x/en/troubleshooting/kubernetes-components/e
 https://rancher.com/learning-paths/building-a-highly-available-kubernetes-cluster/
 
 
- 
- 
+# Aula 3 - Aplicação - Preparação
+  Pasta /app
+
+# Aula 4 - Aplicação - Build
+  Pasta /app
+
+# Aula 5 - Aplicação - Deploy
+  Pasta /app
 
 
- 
-## Requisitos
+# Aula 6 - Aplicação - SSL
 
-Cluster Kubernetes HA de Produção
+Criação do certificado
 
-3 instâncias para ETCD - Podendo perder 1
-2 instâncias para CONTROLPLANE - Podendo perder 1
-4 instâncias para WORKER - Podendo perder todas
+Criar certificado para nossos dominios:
 
- 
-Usando na demonstração: UBUNTU 16.04 LTS
- 
-Usando na demonstração: UBUNTU 22.04 LTS
- 
-
-## Docker instalado em todas as máquinas
-
-```sh
-#!/bin/bash
-curl https://releases.rancher.com/install-docker/20.10.sh | sh
-usermod -aG docker ubuntu
-```
-
-
-## INCIO
-
-Abrir o Rancher e criar um novo cluster.
-
-Adicionar novo cluster com Existing Nodes
-
- 
-
- 
- 
-```sh
-$ ssh -i devops-ninja.pem ubuntu@3.227.241.169   # - Rancher-server
-
-#ETCD
-$ ssh -i devops-ninja.pem ubuntu@34.200.230.114  # - etcd-1
-$ ssh -i devops-ninja.pem ubuntu@3.238.62.131    # - etcd-2
-$ ssh -i devops-ninja.pem ubuntu@3.230.119.189   # - etcd-3
-
-#CONTROLPLANE
-$ ssh -i devops-ninja.pem ubuntu@3.238.34.100  # - controlplane-1
-$ ssh -i devops-ninja.pem ubuntu@3.236.176.198 # - controlplane-2
-
-#WORKER
-$ ssh -i devops-ninja.pem ubuntu@34.205.53.204 # - worker-1
-$ ssh -i devops-ninja.pem ubuntu@3.236.174.43  # - worker-2
-$ ssh -i devops-ninja.pem ubuntu@3.80.162.150  # - worker-3
-$ ssh -i devops-ninja.pem ubuntu@3.237.75.239  # - worker-4
-
-
-# docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run rancher/rancher-agent:v2.5.0 --server https://3.227.241.169 --token zw9dgzb99n7fkg7l7lsb4wn6p49gmhcfjdp9chpzllzgpnjg9gv967 --ca-checksum 7c481267daae071cd8ad8a9dd0f4c5261038889eccbd1a8e7b0aa1434053731b --node-name etcd-1 --etcd
-
-# docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run rancher/rancher-agent:v2.5.0 --server https://3.227.241.169 --token zw9dgzb99n7fkg7l7lsb4wn6p49gmhcfjdp9chpzllzgpnjg9gv967 --ca-checksum 7c481267daae071cd8ad8a9dd0f4c5261038889eccbd1a8e7b0aa1434053731b --node-name etcd-2 --etcd
-
-# docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run rancher/rancher-agent:v2.5.0 --server https://3.227.241.169 --token zw9dgzb99n7fkg7l7lsb4wn6p49gmhcfjdp9chpzllzgpnjg9gv967 --ca-checksum 7c481267daae071cd8ad8a9dd0f4c5261038889eccbd1a8e7b0aa1434053731b --node-name etcd-3 --etcd
-
-# docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run rancher/rancher-agent:v2.5.0 --server https://3.227.241.169 --token zw9dgzb99n7fkg7l7lsb4wn6p49gmhcfjdp9chpzllzgpnjg9gv967 --ca-checksum 7c481267daae071cd8ad8a9dd0f4c5261038889eccbd1a8e7b0aa1434053731b --node-name controlplane-1 --controlplane
-
-# docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run rancher/rancher-agent:v2.5.0 --server https://3.227.241.169 --token zw9dgzb99n7fkg7l7lsb4wn6p49gmhcfjdp9chpzllzgpnjg9gv967 --ca-checksum 7c481267daae071cd8ad8a9dd0f4c5261038889eccbd1a8e7b0aa1434053731b --node-name controlplane-2 --controlplane
-
-# docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run rancher/rancher-agent:v2.5.0 --server https://3.227.241.169 --token zw9dgzb99n7fkg7l7lsb4wn6p49gmhcfjdp9chpzllzgpnjg9gv967 --ca-checksum 7c481267daae071cd8ad8a9dd0f4c5261038889eccbd1a8e7b0aa1434053731b --node-name worker-1 --worker
-
-# docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run rancher/rancher-agent:v2.5.0 --server https://3.227.241.169 --token zw9dgzb99n7fkg7l7lsb4wn6p49gmhcfjdp9chpzllzgpnjg9gv967 --ca-checksum 7c481267daae071cd8ad8a9dd0f4c5261038889eccbd1a8e7b0aa1434053731b --node-name worker-2 --worker
-
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## NFS Server para Infra e demais clusters
-
-```sh
-K8S-NFS-PROD
-SSH: 170.231.14.234:41492 
-Login: ubuntu
-Senha: uYP3Z97*L
-```
-ssh -p 41492 ubuntu@170.231.14.234
-
-NFS Server IP: 10.40.80.19
-NFS Clients IPs: From the 10.40.80.0/24 range
+*.prod.devopsforlife.io
 
 
 ```sh
-sudo apt install nfs-kernel-server -y
-
-# verificar versão
-
-sudo cat /proc/fs/nfsd/versions
-# -2 +3 +4 +4.1 +4.2
-
-  # /etc/default/nfs-kernel-server
-  # /etc/default/nfs-common
-
-# DIRETORIO
-# /srv/nfs4  
-
-sudo mkdir -p /srv/nfs4/infra
-sudo mkdir -p /srv/nfs4/qa
-sudo mkdir -p /srv/nfs4/prod
-
-sudo chown nobody:nogroup /srv/nfs4/infra
-sudo chown nobody:nogroup /srv/nfs4/qa
-sudo chown nobody:nogroup /srv/nfs4/prod
-
-sudo chmod -R 777 /srv/nfs4/infra
-sudo chmod -R 777 /srv/nfs4/qa
-sudo chmod -R 777 /srv/nfs4/prod
-
-sudo vi /etc/exports
-
-/srv/nfs4/infra 10.40.80.27(rw,sync,no_subtree_check) 10.40.80.24(rw,sync,no_subtree_check) 10.40.80.29(rw,sync,no_subtree_check)
-/srv/nfs4/qa 10.40.80.28(rw,sync,no_subtree_check) 10.40.80.16(rw,sync,no_subtree_check) 10.40.80.26(rw,sync,no_subtree_check)
-
-# /srv/nfs4/prod 10.40.80.0/24 (rw,sync,no_subtree_check)
-
-
-# SEMPRE QUE NOVAS MAQUINAS FOREM ADICIONADAS AO CLUSTER, É PRECISO INSERILAS NO NFS
-
-sudo exportfs -a
-
-systemctl status nfs-server
-
-systemctl restart nfs-server
-sudo ufw status
-```
-
-
-
-## Configurar o cliente NFS para teste na máquina
-
-```sh
-sudo apt update
-sudo apt install nfs-common -y
-
-sudo mkdir -p /mnt/client_infra2
-sudo mount 10.40.80.19:/srv/nfs4/infra /mnt/client_infra2
-cd /mnt/client_infra2
-touch nfs_share.txt
-
-sudo umount -l /mnt/client_infra2
-```
-
-## Helm Chart - NFS Driver for Kubernetes
-
-StorageClass para Kubernetes para NFS
-https://github.com/kubernetes-csi/csi-driver-nfs
-
-```sh
-helm repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
-helm install csi-driver-nfs csi-driver-nfs/csi-driver-nfs --namespace kube-system --version v4.1.0
-```
-
-
-## nfs-infra.yaml
-```yaml
----
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: nfs-csi
-provisioner: nfs.csi.k8s.io
-parameters:
-  server: 10.40.80.19
-  share: /srv/nfs4/infra
-reclaimPolicy: Delete
-volumeBindingMode: Immediate
-mountOptions:
-  - hard
-  - nfsvers=4.1
-```
-
-
-## nfs-qa.yaml
-```yaml
----
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: nfs-csi
-provisioner: nfs.csi.k8s.io
-parameters:
-  server: 10.40.80.19
-  share: /srv/nfs4/qa
-reclaimPolicy: Delete
-volumeBindingMode: Immediate
-mountOptions:
-  - hard
-  - nfsvers=4.1
-```
-
-
-# pvc.yaml
-```yaml
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: my-pvc
-spec:
-  storageClassName: nfs-csi
-  accessModes: [ReadWriteOnce]
-  resources:
-    requests:
-      storage: 5Gi
+> openssl req -new -x509 -keyout server.key -out server.crt -days 365 -nodes
+Country Name (2 letter code) [AU]:DE
+State or Province Name (full name) [Some-State]:Germany
+Locality Name (eg, city) []:nameOfYourCity
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:nameOfYourCompany
+Organizational Unit Name (eg, section) []:nameOfYourDivision
+Common Name (eg, YOUR name) []:*.example.com
+Email Address []:webmaster@example.com
 ```
 
 ```sh
-kubectl describe pvc my-pvc
+kubectl create secret tls my-tls-secret --key server.key --cert server.crt
 ```
 
+Update do Ingress.
 
 
- 
- 
+
+
+
+
+
+
